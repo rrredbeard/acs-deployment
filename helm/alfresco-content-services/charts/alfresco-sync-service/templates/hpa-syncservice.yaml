@@ -1,6 +1,10 @@
 {{- if .Values.syncservice.enabled }}
 {{- if .Values.syncservice.horizontalPodAutoscaling.enabled }}
+{{- if semverCompare ">=1.19-0" .Capabilities.KubeVersion.GitVersion -}}
+apiVersion: autoscaling/v2beta2
+{{- else -}}
 apiVersion: autoscaling/v2beta1
+{{- end }}
 kind: HorizontalPodAutoscaler
 metadata:
   name: {{ template "syncservice.fullname" . }}-hpa
@@ -17,6 +21,24 @@ spec:
   minReplicas: {{ .Values.syncservice.horizontalPodAutoscaling.minReplicas }}
   maxReplicas: {{ .Values.syncservice.horizontalPodAutoscaling.maxReplicas }}
   metrics:
+{{- if semverCompare ">=1.19-0" .Capabilities.KubeVersion.GitVersion -}}
+  {{- if .Values.syncservice.horizontalPodAutoscaling.CPU.enabled }}
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: {{ .Values.syncservice.horizontalPodAutoscaling.CPU.targetAverageUtilization }}
+  {{- end }}
+  {{- if .Values.syncservice.horizontalPodAutoscaling.memory.enabled }}
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: {{ .Values.syncservice.horizontalPodAutoscaling.memory.targetAverageUtilization }}
+  {{- end }}
+{{- else -}}
   {{- if .Values.syncservice.horizontalPodAutoscaling.CPU.enabled }}
   - type: Resource
     resource:
@@ -29,5 +51,6 @@ spec:
       name: memory
       targetAverageUtilization: {{ .Values.syncservice.horizontalPodAutoscaling.memory.targetAverageUtilization }}
   {{- end }}
+{{- end }}
 {{- end }}
 {{- end }}
