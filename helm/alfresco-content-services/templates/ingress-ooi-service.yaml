@@ -18,14 +18,14 @@ metadata:
 {{- if .Values.ooiService.extraAnnotations }}
 {{ toYaml .Values.ooiService.extraAnnotations | indent 4 }}
 {{- end }}
-
 spec:
   {{- if semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion }}
   ingressClassName: "nginx"
   {{- end }}
   rules:
-  {{- if .Values.ooiService.ingress.hostName }}
-  - host: {{ tpl .Values.ooiService.ingress.hostName $ }}
+  {{- $hostName := tpl (.Values.ooiService.ingress.hostName | default "" ) . }}
+  {{- if $hostName }}
+  - host: {{ $hostName | quote }}
     http:
   {{- else }}
   - http:

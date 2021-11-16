@@ -33,8 +33,9 @@ spec:
   ingressClassName: "nginx"
   {{- end }}
   rules:
-  {{- if .Values.share.ingress.hostName }}
-  - host: {{ tpl .Values.share.ingress.hostName . }}
+  {{- $hostName := tpl (.Values.share.ingress.hostName | default "" ) . }}
+  {{- if $hostName }}
+  - host: {{ $hostName | quote }}
     http:
   {{- else }}
   - http:

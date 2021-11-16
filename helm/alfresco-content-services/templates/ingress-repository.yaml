@@ -33,14 +33,14 @@ metadata:
 {{- if .Values.repository.ingress.annotations }}
 {{ toYaml .Values.repository.ingress.annotations | indent 4 }}
 {{- end }}
-
 spec:
   {{- if semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion }}
   ingressClassName: "nginx"
   {{- end }}
   rules:
-  {{- if .Values.repository.ingress.hostName }}
-  - host: {{ tpl .Values.repository.ingress.hostName . }}
+  {{- $hostName := tpl (.Values.repository.ingress.hostName | default "" ) . }}
+  {{- if $hostName }}
+  - host: {{ $hostName | quote }}
     http:
   {{- else }}
   - http:
